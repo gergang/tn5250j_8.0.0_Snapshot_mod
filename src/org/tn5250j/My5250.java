@@ -22,6 +22,9 @@
  * the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
  * Boston, MA 02111-1307 USA
  *
+ * 
+ * Changes from Version 0.7.6 done by Germann Ergang 2019
+ *
  */
 package org.tn5250j;
 
@@ -61,30 +64,46 @@ import org.tn5250j.tools.LangTool;
 import org.tn5250j.tools.logging.TN5250jLogFactory;
 import org.tn5250j.tools.logging.TN5250jLogger;
 
+
+
+
 public class My5250 implements BootListener, SessionListener, EmulatorActionListener {
 
 	private static final String PARAM_START_SESSION = "-s";
+		
 
-	private GUIViewInterface frame1;
-	private String[] sessionArgs = null;
-	private static Properties sessions = new Properties();
 	private static BootStrapper strapper = null;
-	private SessionManager manager;
 	private static List<GUIViewInterface> frames;
+	
+	private static Properties sessions = new Properties();
+	private static SessionManager manager;
+
 	private TN5250jSplashScreen splash;
 	private int step;
-	private StringBuilder viewNamesForNextStartBuilder = null;
+	public StringBuilder viewNamesForNextStartBuilder = null;
 
-	private TN5250jLogger log = TN5250jLogFactory.getLogger(this.getClass());
+	protected GUIViewInterface frame1;
+	protected String[] sessionArgs = null;
+	protected TN5250jLogger log = TN5250jLogFactory.getLogger(this.getClass());
 
-	My5250 () {
+	
 
+	public static void main(String []args){
+		new My5250(args);
+	}
+
+	
+	public My5250 (String[] args) {
+
+		prepare(args);
+		if (strapper != null) {
+			strapper.addBootListener(this);
+		}
 		splash = new TN5250jSplashScreen("tn5250jSplash.jpg");
 		splash.setSteps(5);
 		splash.setVisible(true);
 
 		loadLookAndFeel();
-
 
 		loadSessions();
 		splash.updateProgress(++step);
@@ -93,11 +112,11 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 
 		initScripting();
 
-		// sets the starting frame type.  At this time there are tabs which is
-		//    default and Multiple Document Interface.
-//		startFrameType();
+		// sets the starting frame type.  At this time there are tabs which is default and Multiple Document Interface.
+		// startFrameType();
 
 		frames = new ArrayList<GUIViewInterface>();
+		makeFrame1();
 
 		newView();
 
@@ -105,7 +124,13 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		manager = SessionManager.instance();
 		splash.updateProgress(++step);
 		Tn5250jController.getCurrent();
+		addSessions(args);
 	}
+
+	
+
+
+
 
 
 	/**
@@ -131,17 +156,31 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 	}
 
 	/**
+	 * if we do not find a running instance and the -d options is
+	 * specified, start up the bootstrap daemon to allow checking for running instances
+	 * @param args
+	 */
+	private void checkBootStrapper(String[] args){
+		if (!isSpecified("-nc",args)) {
+			if (!findBootStrapperDeamon(args)) {
+				if (isSpecified("-d",args)) {
+					strapper = new BootStrapper();
+					strapper.start();
+				}
+			}
+			else {
+				exit();
+			}
+		}
+	}
+	/**
 	 * Check if there are any other instances of tn5250j running
 	 */
-	static private boolean checkBootStrapper (String[] args) {
-
+	private boolean findBootStrapperDeamon (String[] args) {
 		try {
 			Socket boot = new Socket("localhost", 3036);
-
 			PrintWriter out = new PrintWriter(boot.getOutputStream(), true);
-
-			// parse args into a string to send to the other instance of
-			//    tn5250j
+			// parse args into a string to send to the other instance of tn5250j
 			String opts = null;
 			for (int x = 0;x < args.length; x++) {
 				if (opts != null)
@@ -164,9 +203,10 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 			// TODO: Should be logged @ DEBUG level
 			//         System.err.println("No other instances of tn5250j running.");
 		}
-
+		
 		return false;
 	}
+
 
 	public void bootOptionsReceived(BootEvent bootEvent) {
 		log.info(" boot options received " + bootEvent.getNewSessionOptions());
@@ -181,181 +221,132 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 			String[] args = new String[TN5250jConstants.NUM_PARMS];
 			parseArgs(bootEvent.getNewSessionOptions(), args);
 
-
 			if (isSpecified("-s",args)) {
-
 				String sd = getParm("-s",args);
 				if (sessions.containsKey(sd)) {
 					parseArgs(sessions.getProperty(sd), args);
 					final String[] args2 = args;
 					final String sd2 = sd;
-					SwingUtilities.invokeLater(
-							new Runnable () {
-								public void run() {
-									newSession(sd2,args2);
-
-								}
-							}
-					);
+					runLater(sd2,args2);
 				}
 			}
 			else {
-
 				if (args[0].startsWith("-")) {
-					SwingUtilities.invokeLater(
-							new Runnable () {
-								public void run() {
-									startNewSession();
-
-								}
-							}
-					);
+					runLater(null,null);
 				}
 				else {
 					final String[] args2 = args;
 					final String sd2 = args[0];
-					SwingUtilities.invokeLater(
-							new Runnable () {
-								public void run() {
-									newSession(sd2,args2);
-
-								}
-							}
-					);
+					runLater(sd2,args2);runLater(sd2,args2);
 				}
 			}
 		}
 		else {
-			SwingUtilities.invokeLater(
-					new Runnable () {
-						public void run() {
-							startNewSession();
-
-						}
-					}
-			);
+			runLater(null,null);
 		}
 	}
 
-	static public void main(String[] args) {
+	
+	private void runLater(final String sd2, final String[] args2){
+		SwingUtilities.invokeLater(new Runnable () {
+	        @Override
+	        public void run () {
+	        	if(sd2!=null)  {
+	        		newSession(sd2,args2);
+	        	}else{
+	        		startNewSession();
+	        	}
+	        }
+	    });
+	}
 
-		if (!isSpecified("-nc",args)) {
 
-			if (!checkBootStrapper(args)) {
 
-				// if we did not find a running instance and the -d options is
-				//    specified start up the bootstrap daemon to allow checking
-				//    for running instances
-				if (isSpecified("-d",args)) {
-					strapper = new BootStrapper();
-
-					strapper.start();
-				}
-			}
-			else {
-
-				System.exit(0);
-			}
-		}
-
-		My5250 m = new My5250();
-
-		if (strapper != null)
-			strapper.addBootListener(m);
-
+	private void checkFrameSize(String[] args){
 		if (args.length > 0) {
-
 			if (isSpecified("-width",args) ||
 					isSpecified("-height",args)) {
-				int width = m.frame1.getWidth();
-				int height = m.frame1.getHeight();
+				int width =  frame1.getWidth();
+				int height = frame1.getHeight();
 
 				if (isSpecified("-width",args)) {
-					width = Integer.parseInt(My5250.getParm("-width",args));
+					width = Integer.parseInt(getParm("-width",args));
 				}
 				if (isSpecified("-height",args)) {
-					height = Integer.parseInt(My5250.getParm("-height",args));
+					height = Integer.parseInt(getParm("-height",args));
 				}
-
-				m.frame1.setSize(width,height);
-				m.frame1.centerFrame();
-
-
-			}
-
-			/**
-			 * @todo this crap needs to be rewritten it is a mess
-			 */
-			if (args[0].startsWith("-")) {
-
-				// check if a session parameter is specified on the command line
-				if (isSpecified("-s",args)) {
-
-					String sd = getParm("-s",args);
-					if (sessions.containsKey(sd)) {
-						sessions.setProperty("emul.default",sd);
-					}
-					else {
-						args = null;
-					}
-
-				}
-
-				// check if a locale parameter is specified on the command line
-				if (isSpecified("-L",args)) {
-					Locale.setDefault(parseLocal(getParm("-L",args)));
-				}
-				LangTool.init();
-			}
-			else {
-				LangTool.init();
+				frame1.setSize(width,height);
+				frame1.centerFrame();
 			}
 		}
-		else {
-			LangTool.init();
-		}
+	}
 
+	private void checkLocale(String[] args){
+		if (args.length>0 && args[0].startsWith("-")) {
+			if (isSpecified("-s",args)) {
+				String sd = getParm("-s",args);
+				if (sessions.containsKey(sd)) {
+					sessions.setProperty("emul.default",sd);
+				}
+			}
+			// check if a locale parameter is specified on the command line
+			if (isSpecified("-L",args)) {
+				Locale.setDefault(parseLocal(getParm("-L",args)));
+			}
+		}
+		LangTool.init(); 
+	}
+
+
+
+
+	/**
+	 * adds connections from sessions list in user.home  (C:\Users\(user)\.tn5250j\sessions) see GlobalConfigure class
+	 * and open a new session so splash screen goes away 
+	 * @param args 
+	 * @param args can be empty 
+	 */
+	private void addSessions(String[] args){
 		List<String> lastViewNames = new ArrayList<String>();
 		lastViewNames.addAll(loadLastSessionViewNames());
-		lastViewNames.addAll(loadLastSessionViewNamesFrom(args));
+		if(args!=null){
+			lastViewNames.addAll(loadLastSessionViewNamesFrom(args));
+		}
 		lastViewNames = filterExistingViewNames(lastViewNames);
 
 		if (lastViewNames.size() > 0) {
 			insertDefaultSessionIfConfigured(lastViewNames);
-			startSessionsFromList(m, lastViewNames);
+			startSessionsFromList(this, lastViewNames);
 			if (sessions.containsKey("emul.showConnectDialog")) {
-				m.openConnectSessionDialogAndStartSelectedSession();
+				openConnectSessionDialogAndStartSelectedSession();
 			}
 		}
 		else {
-			m.startNewSession();
+			startNewSession();
 		}
-
 	}
 
-	private static void startSessionsFromList(My5250 m, List<String> lastViewNames) {
+	private void startSessionsFromList(My5250 m, List<String> lastViewNames) {
 		for (int i=0; i<lastViewNames.size(); i++) {
 			String viewName = lastViewNames.get(i);
-			if (!m.frame1.isVisible()) {
-				m.splash.updateProgress(++m.step);
-				m.splash.setVisible(false);
-				m.frame1.setVisible(true);
-				m.frame1.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			if (!frame1.isVisible()) {
+				setFrameVisible(true);
 			}
-
-			m.sessionArgs = new String[TN5250jConstants.NUM_PARMS];
-			My5250.parseArgs(sessions.getProperty(viewName),m.sessionArgs);
-			m.newSession(viewName, m.sessionArgs);
+			sessionArgs = new String[TN5250jConstants.NUM_PARMS];
+			parseArgs(sessions.getProperty(viewName),m.sessionArgs);
+			newSession(viewName, m.sessionArgs);
 		}
 	}
 
-	private static void insertDefaultSessionIfConfigured(List<String> lastViewNames) {
+	private void insertDefaultSessionIfConfigured(List<String> lastViewNames) {
 		if (getDefaultSession() != null && !lastViewNames.contains(getDefaultSession())) {
 			lastViewNames.add(0, getDefaultSession());
 		}
 	}
-
-	static List<String> loadLastSessionViewNamesFrom(String[] commandLineArgs) {
+	/**
+	 * keep accessible from package for testing
+	 */
+	protected static  List<String> loadLastSessionViewNamesFrom(String[] commandLineArgs) {
 		List<String> sessionNames = new ArrayList<String>();
 		boolean foundRightParam = false;
 		for (String arg : commandLineArgs) {
@@ -366,8 +357,10 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		}
 		return sessionNames;
 	}
-
-	static List<String> loadLastSessionViewNames() {
+	/**
+	 * keep accessible from package for testing
+	 */
+	protected static  List<String> loadLastSessionViewNames() {
 		List<String> sessionNames = new ArrayList<String>();
 		if (sessions.containsKey("emul.startLastView")) {
 			String emulview = sessions.getProperty("emul.view", "");
@@ -389,8 +382,10 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		}
 		return sessionNames;
 	}
-
-	static List<String> filterExistingViewNames(List<String> lastViewNames) {
+	/**
+	 * keep accessible from package for testing
+	 */
+	protected static  List<String> filterExistingViewNames(List<String> lastViewNames) {
 		List<String> result = new ArrayList<String>();
 		for (String viewName : lastViewNames) {
 			if (sessions.containsKey(viewName)) {
@@ -400,7 +395,7 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		return result;
 	}
 
-	private static boolean containsNotOnlyNullValues(String[] stringArray) {
+	public boolean containsNotOnlyNullValues(String[] stringArray) {
 		if (stringArray != null) {
 			for (String s : stringArray) {
 				if (s != null) {
@@ -419,7 +414,7 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 
 	}
 
-	static private String getParm(String parm, String[] args) {
+	private String getParm(String parm, String[] args) {
 
 		for (int x = 0; x < args.length; x++) {
 
@@ -430,7 +425,7 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		return null;
 	}
 
-	private static boolean isSpecified(String parm, String[] args) {
+	private boolean isSpecified(String parm, String[] args) {
 
 		if (args == null)
 			return false;
@@ -444,7 +439,8 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		return false;
 	}
 
-	private static String getDefaultSession() {
+
+	public String getDefaultSession() {
 		String defaultSession = sessions.getProperty("emul.default");
 		if (defaultSession != null && !defaultSession.trim().isEmpty()) {
 			return defaultSession;
@@ -452,18 +448,27 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		return null;
 	}
 
-	private void startNewSession() {
-
+	/**
+	 * this was also called via ActionListener from 
+	 * newSession() ->
+	 * (sessionPanel).addEmulatorActionListener(this) -> 
+	 * SessionPopup ("popup.connections") in Line 532-> 
+	 * SessionPanel startNewSession()-> 
+	 * my5250.onEmulatorAction(START_NEW_SESSION) -> my5250.startNewSession()  
+	 * this last part has been changed to my5250.onEmulatorAction(CONNECTIONDIALOG) -> openConnectSessionDialogAndStartSelectedSession();
+	 */
+	public void startNewSession() {
 		String sel = "";
-
 		if (containsNotOnlyNullValues(sessionArgs) && !sessionArgs[0].startsWith("-")) {
 			sel = sessionArgs[0];
 		} else {
 			sel = getDefaultSession();
 		}
+		openSelectedSession(sel);
+	}
 
+	public void openSelectedSession(String sel){	
 		Sessions sess = manager.getSessions();
-
 		if (sel != null && sess.getCount() == 0 && sessions.containsKey(sel)) {
 			sessionArgs = new String[TN5250jConstants.NUM_PARMS];
 			parseArgs(sessions.getProperty(sel), sessionArgs);
@@ -477,42 +482,58 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 	}
 
 
-	private void openConnectSessionDialogAndStartSelectedSession() {
+
+
+	/**
+	 * Connect a session with a given session name <br>
+	 * get session name from GUI Dialog
+	 */
+	public void openConnectSessionDialogAndStartSelectedSession() {
 		String sel = openConnectSessionDialog();
 		Sessions sess = manager.getSessions();
 		if (sel != null) {
-			String selArgs = sessions.getProperty(sel);
-			sessionArgs = new String[TN5250jConstants.NUM_PARMS];
-			parseArgs(selArgs, sessionArgs);
-
-			newSession(sel, sessionArgs);
+			openConnectSessionName(sel);
 		} else {
-			if (sess.getCount() == 0)
-				System.exit(0);
+			if (sess.getCount() == 0){
+				//exit();
+			}
 		}
 	}
 
-	private void startDuplicateSession(SessionPanel ses) {
 
+	private void startDuplicateSession(SessionPanel ses) {
 		loadSessions();
 		if (ses == null) {
 			Sessions sess = manager.getSessions();
 			for (int x = 0; x < sess.getCount(); x++) {
-
 				if ((sess.item(x).getGUI()).isVisible()) {
-
 					ses = sess.item(x).getGUI();
 					break;
 				}
 			}
 		}
-
-		String selArgs = sessions.getProperty(ses.getSessionName());
-		sessionArgs = new String[TN5250jConstants.NUM_PARMS];
-		parseArgs(selArgs, sessionArgs);
-
-		newSession(ses.getSessionName(),sessionArgs);
+		openConnectSessionName(ses.getSessionName());
 	}
+
+
+	/**
+	 * Code put into own method.<br>
+	 */
+	public void openConnectSessionName(String sessionName){
+		if(sessionName == null) {
+			return ;
+		}
+		sessionName=sessionName.trim().toUpperCase();
+		String sessionProperties = sessions.getProperty(sessionName);
+		if (sessionProperties ==null) {
+			log.debug(sessionName + " not found in session list.");
+		} else {
+			sessionArgs = new String[TN5250jConstants.NUM_PARMS];
+			parseArgs(sessionProperties, sessionArgs);
+			newSession(sessionName, sessionArgs);
+		}
+	}
+
 
 	private String openConnectSessionDialog () {
 
@@ -524,7 +545,12 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		return sc.getConnectKey();
 	}
 
-	private synchronized void newSession(String sel,String[] args) {
+
+	/**
+	 * @param sel  system name
+	 * @param args the args from this instance
+	 */
+	public synchronized void newSession(String sel,String[] args) {
 
 		Properties sesProps = new Properties();
 
@@ -537,8 +563,10 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		if (isSpecified("-e",args))
 			sesProps.put(TN5250jConstants.SESSION_TN_ENHANCED,"1");
 
+		String port = null;
 		if (isSpecified("-p",args)) {
-			sesProps.put(TN5250jConstants.SESSION_HOST_PORT,getParm("-p",args));
+			port = getParm("-p",args);
+			sesProps.put(TN5250jConstants.SESSION_HOST_PORT,port);
 		}
 
 		if (isSpecified("-f",args))
@@ -571,12 +599,24 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 				sesProps.put(TN5250jConstants.SESSION_PROXY_PORT ,getParm("-spp",args));
 		}
 
-		// are we to use a ssl and if we are what type
+		
+		String connectionType=TN5250jConstants.SSL_TYPE_NONE;
 		if (isSpecified("-sslType",args)) {
-
-			sesProps.put(TN5250jConstants.SSL_TYPE,getParm("-sslType",args));
+			connectionType = getParm("-sslType",args);
+			sesProps.put(TN5250jConstants.SSL_TYPE, connectionType);
 		}
-
+		
+		if(ConnectDialog.isEnforceTls() && connectionType.equals(TN5250jConstants.SSL_TYPE_NONE)){
+			sesProps.put(TN5250jConstants.SSL_TYPE, TN5250jConstants.SSL_TYPE_TLS);
+			sesProps.put(TN5250jConstants.SESSION_HOST_PORT,"992");
+			log.info("Encryption setting of NONE was overwritten to TLS on Port 992.");
+		}
+		
+		/*
+		 * test for always unencrypted connection:
+		 * */
+		//sesProps.put(TN5250jConstants.SSL_TYPE, TN5250jConstants.SSL_TYPE_NONE);
+		
 
 		// check if device name is specified
 		if (isSpecified("-dn=hostname",args)){
@@ -607,41 +647,44 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 
 
 		if (!frame1.isVisible()) {
-			splash.updateProgress(++step);
-
 			// Here we check if this is the first session created in the system.
-			//  We have to create a frame on initialization for use in other scenarios
-			//  so if this is the first session being added in the system then we
-			//  use the frame that is created and skip the part of creating a new
-			//  view which would increment the count and leave us with an unused
-			//  frame.
+						//  We have to create a frame on initialization for use in other scenarios
+						//  so if this is the first session being added in the system then we
+						//  use the frame that is created and skip the part of creating a new
+						//  view which would increment the count and leave us with an unused
+						//  frame.
 			if (isSpecified("-noembed",args) && sessionCount > 0) {
 				newView();
 			}
-			splash.setVisible(false);
-			frame1.setVisible(true);
-			frame1.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			setFrameVisible(true);
 		}
 		else {
 			if (isSpecified("-noembed",args)) {
-				splash.updateProgress(++step);
 				newView();
-				splash.setVisible(false);
-				frame1.setVisible(true);
-				frame1.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				setFrameVisible(true);
 
 			}
 		}
 
-		if (isSpecified("-t",args))
+		if (isSpecified("-t",args)){
 			frame1.addSessionView(sel,s);
-		else
+		}
+		else{
 			frame1.addSessionView(session,s);
+		}
 
 		s.connect();
-
-		s.addEmulatorActionListener(this);
+		s.addEmulatorActionListener(this); 
 	}
+
+
+	public void setFrameVisible(boolean increment){
+		if(increment)splash.updateProgress(++step);
+		splash.setVisible(false);
+		frame1.setVisible(true);
+		frame1.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	}
+
 
 	private void newView() {
 
@@ -657,12 +700,9 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		if (sessions.containsKey("emul.height"))
 			height = Integer.parseInt(sessions.getProperty("emul.height"));
 
-		frame1 = new Gui5250Frame(this);
 
 		frame1.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
 		if (sessions.containsKey("emul.frame" + frame1.getFrameSequence())) {
-
 			String location = sessions.getProperty("emul.frame" + frame1.getFrameSequence());
 			//         System.out.println(location + " seq > " + frame1.getFrameSequence() );
 			restoreFrame(frame1,location);
@@ -674,6 +714,12 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 
 		frames.add(frame1);
 
+	}
+
+	
+	public void makeFrame1(){
+		Gui5250Frame.addTlsHintToFrameName(ConnectDialog.isEnforceTls());
+		frame1 = new Gui5250Frame(this);	
 	}
 
 	private void restoreFrame(GUIViewInterface frame,String location) {
@@ -688,34 +734,22 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		frame.setSize(width,height);
 	}
 
-	/**
-	 * @param view
-	 */
 	protected void closingDown(GUIViewInterface view) {
-
 		Sessions sess = manager.getSessions();
-
 		if (log.isDebugEnabled()) {
 			log.debug("number of active sessions we have " + sess.getCount());
 		}
-
 		if (viewNamesForNextStartBuilder == null) {
 			// preserve sessions for next boot
 			viewNamesForNextStartBuilder = new StringBuilder();
 		}
-		while (view.getSessionViewCount() > 0) {
-			SessionPanel sesspanel = view.getSessionAt(0);
-			viewNamesForNextStartBuilder.append("-s ")
-										.append(sesspanel.getSessionName())
-										.append(" ");
-			closeSessionInternal(sesspanel);
-		}
+		closeSessionsInternal(view);
 
 		sessions.setProperty("emul.frame" + view.getFrameSequence(),
 				view.getX() + "," +
-				view.getY() + "," +
-				view.getWidth() + "," +
-				view.getHeight());
+						view.getY() + "," +
+						view.getWidth() + "," +
+						view.getHeight());
 
 		frames.remove(view);
 		view.dispose();
@@ -725,11 +759,10 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		}
 
 		log.info("view settings " + viewNamesForNextStartBuilder);
-		if (sess.getCount() == 0) {
 
+		if (sess.getCount() == 0) {
 			sessions.setProperty("emul.width",Integer.toString(view.getWidth()));
 			sessions.setProperty("emul.height",Integer.toString(view.getHeight()));
-
 			sessions.setProperty("emul.view",viewNamesForNextStartBuilder.toString());
 
 			// save off the session settings before closing down
@@ -739,32 +772,14 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 			if (strapper != null) {
 				strapper.interrupt();
 			}
-			System.exit(0);
 		}
 
-
+		exit();
 	}
 
-	/**
-	 * Really closes the tab/session
-	 * @param sesspanel
-	 */
-	protected void closeSessionInternal(SessionPanel sesspanel) {
-		GUIViewInterface f = getParentView(sesspanel);
-		if (f == null) {
-			return;
-		}
-		Sessions sessions = manager.getSessions();
-		if ((sessions.item(sesspanel.getSession())) != null) {
-			f.removeSessionView(sesspanel);
-			manager.closeSession(sesspanel);
-		}
-		if (manager.getSessions().getCount() < 1) {
-			closingDown(f);
-		}
-	}
 
-	private static void parseArgs(String theStringList, String[] s) {
+
+	private void parseArgs(String theStringList, String[] s) {
 		int x = 0;
 		StringTokenizer tokenizer = new StringTokenizer(theStringList, " ");
 		while (tokenizer.hasMoreTokens()) {
@@ -772,7 +787,7 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		}
 	}
 
-	private static Locale parseLocal(String localString) {
+	private Locale parseLocal(String localString) {
 		int x = 0;
 		String[] s = {"","",""};
 		StringTokenizer tokenizer = new StringTokenizer(localString, "_");
@@ -782,14 +797,22 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		return new Locale(s[0],s[1],s[2]);
 	}
 
-	private static void loadSessions() {
-
-		sessions = (ConfigureFactory.getInstance()).getProperties(
-				ConfigureFactory.SESSIONS);
+	/**
+	 * Initialise ConfigureFactory if not yet done.<br>
+	 * ConfigureFactory initialises GlobalConfigure and<br>
+	 * GlobalConfigure then loads the "sessions" file in user.home into the sessions property.<br>
+	 * ConfigureFactory.getInstance() returns the GlobalConfigure object.
+	 */
+	private void loadSessions() {
+		sessions = (ConfigureFactory.getInstance()).getProperties(ConfigureFactory.SESSIONS);
+		return;
 	}
 
+	/**
+	 * used by Session5250
+	 */
+	@Override
 	public void onSessionChanged(SessionChangeEvent changeEvent) {
-
 		Session5250 ses5250 = (Session5250)changeEvent.getSource();
 		SessionPanel ses = ses5250.getGUI();
 
@@ -800,6 +823,10 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		}
 	}
 
+	/**
+	 * used by SessionPanel
+	 */
+	@Override
 	public void onEmulatorAction(EmulatorActionEvent actionEvent) {
 
 		SessionPanel ses = (SessionPanel)actionEvent.getSource();
@@ -816,11 +843,14 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		case EmulatorActionEvent.START_DUPLICATE:
 			startDuplicateSession(ses);
 			break;
+		case EmulatorActionEvent.FIND_AND_OPEN_EXISTING_SESSION:
+			openConnectSessionDialogAndStartSelectedSession();
+			break;
 		}
 	}
 
+	
 	private GUIViewInterface getParentView(SessionPanel session) {
-
 		GUIViewInterface f = null;
 
 		for (int x = 0; x < frames.size(); x++) {
@@ -828,63 +858,143 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 			if (f.containsSession(session))
 				return f;
 		}
-
 		return null;
-
 	}
 
 	/**
 	 * Initializes the scripting environment if the jython interpreter exists
 	 * in the classpath
 	 */
-	 private void initScripting() {
+	private void initScripting() {
 
-		 try {
-			 Class.forName("org.tn5250j.scripting.JPythonInterpreterDriver");
-		 }
-		 catch (java.lang.NoClassDefFoundError ncdfe) {
-			 log.warn("Information Message: Can not find scripting support"
-					 + " files, scripting will not be available: "
-					 + "Failed to load interpreter drivers " + ncdfe);
-		 }
-		 catch (Exception ex) {
-			 log.warn("Information Message: Can not find scripting support"
-					 + " files, scripting will not be available: "
-					 + "Failed to load interpreter drivers " + ex);
-		 }
+		try {
+			Class.forName("org.tn5250j.scripting.JPythonInterpreterDriver");
+		}
+		catch (java.lang.NoClassDefFoundError ncdfe) {
+			log.warn("Information Message: Can not find scripting support"
+					+ " files, scripting will not be available: "
+					+ "Failed to load interpreter drivers " + ncdfe);
+		}
+		catch (Exception ex) {
+			log.warn("Information Message: Can not find scripting support"
+					+ " files, scripting will not be available: "
+					+ "Failed to load interpreter drivers " + ex);
+		}
 
-		 splash.updateProgress(++step);
+		splash.updateProgress(++step);
 
-	 }
+	}
 
-	 /**
-	  * Sets the jar path for the available jars.
-	  * Sets the python.path system variable to make the jython jar available
-	  * to scripting process.
-	  *
-	  * This needs to be rewritten to loop through and obtain all jars in the
-	  * user directory.  Maybe also additional paths to search.
-	  */
-	 private void initJarPaths() {
+	/**
+	 * Sets the jar path for the available jars.
+	 * Sets the python.path system variable to make the jython jar available
+	 * to scripting process.
+	 *
+	 * This needs to be rewritten to loop through and obtain all jars in the
+	 * user directory.  Maybe also additional paths to search.
+	 */
+	private void initJarPaths() {
 
-		 String jarClassPaths = System.getProperty("python.path")
-		 + File.pathSeparator + "jython.jar"
-		 + File.pathSeparator + "jythonlib.jar"
-		 + File.pathSeparator + "jt400.jar"
-		 + File.pathSeparator + "itext.jar";
+		String jarClassPaths = System.getProperty("python.path")
+				+ File.pathSeparator + "jython.jar"
+				+ File.pathSeparator + "jythonlib.jar"
+				+ File.pathSeparator + "jt400.jar"
+				+ File.pathSeparator + "itext.jar";
 
-		 if (sessions.containsKey("emul.scriptClassPath")) {
-			 jarClassPaths += File.pathSeparator + sessions.getProperty("emul.scriptClassPath");
-		 }
+		if (sessions.containsKey("emul.scriptClassPath")) {
+			jarClassPaths += File.pathSeparator + sessions.getProperty("emul.scriptClassPath");
+		}
 
-		 System.setProperty("python.path",jarClassPaths);
+		System.setProperty("python.path",jarClassPaths);
 
-		 splash.updateProgress(++step);
+		splash.updateProgress(++step);
 
-	 }
+	}
 
-	 static Properties getSessions() {
-		 return sessions;
-	 }
+
+
+
+	public static SessionManager getSessionManager(){
+		return manager;
+	}
+	
+	
+	
+	
+	
+	
+	
+	//***changes from here***********************************************/
+
+
+
+	private void prepare(String[] args){
+		if(args==null) args = new String[]{};
+		checkBootStrapper(args);
+		checkFrameSize(args);
+		checkLocale(args);
+	}
+
+
+	/**
+	 * Logic changed to avoid buffer overflow. <br>
+	 */
+	private void closeSessionsInternal(GUIViewInterface view){
+		int count = view.getSessionViewCount()-1;
+		for(int i=count;i>-1;i--){
+			SessionPanel sesspanel = view.getSessionAt(i);
+			viewNamesForNextStartBuilder.append("-s ")
+			.append(sesspanel.getSessionName())
+			.append(" ");
+			closeSessionInternal(sesspanel);
+		}
+		log.info("view.getSessionViewCount() = " + view.getSessionViewCount());
+	}
+	
+	private void closeSessionInternal(SessionPanel sesspanel) {
+		try{
+			GUIViewInterface f = getParentView(sesspanel);
+			if (f != null) {
+				Sessions sess = manager.getSessions();
+				if ((sess.item(sesspanel.getSession())) != null) {
+					f.removeSessionView(sesspanel);
+				}
+			}
+			manager.closeSession(sesspanel);  
+			if (manager.getSessions().getCount() < 1) {
+				closingDown(f);
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+
+
+	public void exit(){
+		disconnectAll();
+		System.exit(0);
+	}
+
+	public void disconnectAll(){
+		Sessions sess = manager.getSessions();
+		for (int x = 0; x < sess.getCount(); x++) {
+			try{
+				Session5250 s5250= sess.item(x);
+				s5250.disconnect();
+			}catch(Exception e){
+				log.debug("Error closing a tn5250j session : " + e.getMessage());
+			}
+		}
+	}
+
+	public static void setEnforceTLS(boolean b){
+		ConnectDialog.setEnforceTls(b);
+	}
+	public static Properties getSessions(){
+		return sessions;
+	}
+
+	
 
 }
