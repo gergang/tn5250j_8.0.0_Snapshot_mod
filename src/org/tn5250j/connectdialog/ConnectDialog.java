@@ -369,6 +369,7 @@ public class ConnectDialog extends JDialog implements ActionListener, ChangeList
     editButton = addOptButton(LangTool.getString("ss.optEdit"), "EDIT",
         sessionOptPanel, false);
 
+    addEnforceTlsOptionTo(sessionPanel);
   }
 
   private void createEmulatorOptionsPanel() {
@@ -1269,4 +1270,27 @@ public class ConnectDialog extends JDialog implements ActionListener, ChangeList
     }
   }
 
+  
+
+	private static JCheckBox tlsAlwaysCB = new JCheckBox("Overwrite SSL setting 'NONE' with 'TLS' on port 992");
+
+	private void addEnforceTlsOptionTo(JPanel jp) {
+		//create TLS option panel *************************************************
+		JPanel tlsAlwaysPanel = new JPanel();
+		tlsAlwaysPanel.setLayout(new AlignLayout(1, 5, 5));
+		TitledBorder tlsAlwaysPanelBorder = BorderFactory.createTitledBorder("Connection");
+		tlsAlwaysPanelBorder.setTitleJustification(TitledBorder.CENTER);
+		tlsAlwaysPanel.setBorder(tlsAlwaysPanelBorder);
+		tlsAlwaysPanel.add(tlsAlwaysCB);
+		jp.add(tlsAlwaysPanel, BorderLayout.WEST);
+	}
+
+	public static void setEnforceTls(boolean b){
+		tlsAlwaysCB.setEnabled(!b); 
+		tlsAlwaysCB.setSelected(b);
+	}
+	public static boolean isEnforceTls(){
+		return tlsAlwaysCB.isSelected();
+	}
+  
 }
