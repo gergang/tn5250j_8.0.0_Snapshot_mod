@@ -1,3 +1,7 @@
+Based on TN5250J of Version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/tree/master/src/org/tn5250j
+
+
+
 # TN5250J
 A 5250 terminal emulator for the IBM i (AS/400) written in Java.
 
@@ -11,7 +15,7 @@ This project was created because there was no terminal emulator for Linux with f
 
 It was then open sourced to give something back to all those hackers and code churners that work so hard to provide the Linux and Open Source communities with quality work and software.
 
-The original developer wanted it to work on different operating systems, thus Java giving the “J” at the end.
+
 
 ## Hosting
 
