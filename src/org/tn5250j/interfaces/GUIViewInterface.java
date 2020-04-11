@@ -20,6 +20,8 @@
  */
 package org.tn5250j.interfaces;
 
+import javax.swing.JTabbedPane;
+
 import org.tn5250j.My5250;
 import org.tn5250j.SessionPanel;
 import org.tn5250j.event.SessionChangeEvent;
@@ -58,4 +60,5 @@ public abstract class GUIViewInterface extends GenericTn5250JFrame {
    public abstract void onSessionJump(SessionJumpEvent jumpEvent);
    public abstract void onSessionChanged(SessionChangeEvent changeEvent);
 
+   public abstract JTabbedPane getJTabbedPane();
 }
