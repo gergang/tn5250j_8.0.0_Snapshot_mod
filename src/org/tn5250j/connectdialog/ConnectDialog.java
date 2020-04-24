@@ -1310,7 +1310,7 @@ public class ConnectDialog extends JDialog implements ActionListener, ChangeList
 		tlsAlwaysCB = new JCheckBox("Overwrite Encryption Setting 'NONE' to 'TLS' (Port 992)");
 		tlsAlwaysCB.setBorder(BorderFactory.createEmptyBorder(5, 12, 0, 10));
 		tlsAlwaysCB.setSelected(true);
-		if (!properties.containsKey(CHANGE_NONE_TO_TLS)){
+		if (!properties.containsKey(CHANGE_NONE_TO_TLS) && tlsAlwaysCB.isEnabled()){
 				tlsAlwaysCB.setSelected(false);
 		}
 		tlsAlwaysCB.addItemListener(new java.awt.event.ItemListener() {
