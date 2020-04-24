@@ -1,3 +1,26 @@
+Based on TN5250J of Version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/tree/master/src/org/tn5250j
+
+ConnectDialog
+ - Resizable dialog & connections scrollpane
+ - Checkbox added to connections panel to overwrite encryption setting
+ - Cancel & Window closing will now properly shut down the JVM if no sessions exist   
+ 
+My5250
+ - Code cleaned up
+ - Shutdown logic changed to avoid buffer overflow error when closing/reopening sessions
+ - System.exit(0) put into its own method & made public hence overwritable
+ - New Action Event: FIND_AND_OPEN_EXISTING_SESSION
+
+Small changes: 
+ Gui5250Frame
+ GlobalConfigure
+ EmulatorActionEvent
+ GUIViewInterface
+to make certain elements accessible from outside.
+
+Check out my website : https://gergang.net/ibmi
+
+
 # TN5250J
 A 5250 terminal emulator for the IBM i (AS/400) written in Java.
 
@@ -11,7 +34,7 @@ This project was created because there was no terminal emulator for Linux with f
 
 It was then open sourced to give something back to all those hackers and code churners that work so hard to provide the Linux and Open Source communities with quality work and software.
 
-The original developer wanted it to work on different operating systems, thus Java giving the “J” at the end.
+
 
 ## Hosting
 

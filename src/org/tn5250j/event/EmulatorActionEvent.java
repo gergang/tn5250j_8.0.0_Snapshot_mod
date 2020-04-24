@@ -29,7 +29,8 @@ public class EmulatorActionEvent extends EventObject {
 	public static final int START_NEW_SESSION = 2;
 	public static final int CLOSE_EMULATOR = 3;
 	public static final int START_DUPLICATE = 4;
-
+	public static final int FIND_AND_OPEN_EXISTING_SESSION = 5;
+	
 	public EmulatorActionEvent(Object obj) {
 		super(obj);
 
