@@ -31,6 +31,7 @@ import org.tn5250j.tools.logging.TN5250jLogger;
 
 import javax.swing.*;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
 
@@ -54,8 +55,9 @@ public class GlobalConfigure extends ConfigureFactory {
    */
   static private Properties settings;
 
-  static private Hashtable registry = new Hashtable();
-  static private Hashtable headers = new Hashtable();  //LUC GORRENS
+  static private HashMap<String, Properties> registry = new HashMap<String, Properties>();
+  static private HashMap<String, String> headers = new HashMap<String, String>();  //LUC GORRENS
+
 
   // Moved to ConfigureFactory
   //   static final public String SESSIONS = "sessions";
@@ -561,6 +563,13 @@ public class GlobalConfigure extends ConfigureFactory {
     return settings.getProperty("emulator.settingsDirectory");
 
   }
+  
+  /**
+	 * @return full qualified name of settings file
+	 */
+	public String getSessionConfiguration_FQN(){
+		return settingsDirectory() + SESSIONS;
+	}
 
   /**
    * Not sure yet so be careful using this.

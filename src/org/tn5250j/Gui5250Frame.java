@@ -498,9 +498,6 @@ SessionJumpListener {
 	final static String TN5250J="tn5250j";  //connection overwrite (to always UNP or always TLS) can be changed in My5250.java, newSession(...)
 	static String tn5250jExt=TN5250J; 
 
-	public static void addTlsHintToFrameName(boolean tls) {
-		Gui5250Frame.tn5250jExt = TN5250J + (tls?" TLS":"");
-	}
 	public JTabbedPane getJTabbedPane(){
 		return this.sessTabbedPane;
 	}

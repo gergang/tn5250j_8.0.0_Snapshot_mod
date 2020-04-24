@@ -124,6 +124,9 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 		manager = SessionManager.instance();
 		splash.updateProgress(++step);
 		Tn5250jController.getCurrent();
+		
+		ConnectDialog.setMy5250(this);
+		ConnectDialog.initialiseProperties();
 		addSessions(args);
 	}
 
@@ -718,7 +721,6 @@ public class My5250 implements BootListener, SessionListener, EmulatorActionList
 
 	
 	public void makeFrame1(){
-		Gui5250Frame.addTlsHintToFrameName(ConnectDialog.isEnforceTls());
 		frame1 = new Gui5250Frame(this);	
 	}
 
