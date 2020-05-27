@@ -18,7 +18,7 @@ Small changes:
  GUIViewInterface
 to make certain elements accessible from outside.
 
-Check out my website for a software that uses tn5250j : https://gergang.net/ibmi/sit/features
+Check out my website for a commercial software that can make use of this tn5250j' autosignon feature : https://gergang.net/ibmi/sit/features
 
 
 # TN5250J
