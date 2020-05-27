@@ -25,6 +25,8 @@ public interface TN5250jConstants {
 
   // Version information
   String VERSION_INFO = "0.8.0-Snapshot";
+  String GIT_INFO = "https://github.com/tn5250j/tn5250j/tree/master/src/org/tn5250j";
+  String GIT_INFO_Mod = "https://github.com/gergang/tn5250j_8.0.0_Snapshot_mod.git";
 
   // STATE
   static final int STATE_DISCONNECTED = 0;

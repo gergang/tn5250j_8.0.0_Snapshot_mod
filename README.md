@@ -18,7 +18,7 @@ Small changes:
  GUIViewInterface
 to make certain elements accessible from outside.
 
-Check out my website : https://gergang.net/ibmi
+Check out my website for an admin software that integrates tn5250j : https://gergang.net/ibmi/sit/features
 
 
 # TN5250J

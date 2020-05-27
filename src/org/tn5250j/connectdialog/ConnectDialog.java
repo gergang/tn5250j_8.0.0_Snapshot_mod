@@ -867,7 +867,12 @@ public class ConnectDialog extends JDialog implements ActionListener, ChangeList
 		tb.setTitleJustification(TitledBorder.CENTER);
 
 		contenpane.add(new JLabel("TN5250j"));
+		contenpane.add(new JLabel(" "));
 		contenpane.add(new JLabel("Version: " + TN5250jConstants.VERSION_INFO));
+		contenpane.add(new JLabel(TN5250jConstants.GIT_INFO));
+		contenpane.add(new JLabel(" "));
+		contenpane.add(new JLabel("Modification:"));
+		contenpane.add(new JLabel(TN5250jConstants.GIT_INFO_Mod));
 
 		contenpane.setLayout(new BoxLayout(contenpane, BoxLayout.Y_AXIS));
 
@@ -1310,7 +1315,7 @@ public class ConnectDialog extends JDialog implements ActionListener, ChangeList
 		tlsAlwaysCB = new JCheckBox("Overwrite Encryption Setting 'NONE' to 'TLS' (Port 992)");
 		tlsAlwaysCB.setBorder(BorderFactory.createEmptyBorder(5, 12, 0, 10));
 		tlsAlwaysCB.setSelected(true);
-		if (!properties.containsKey(CHANGE_NONE_TO_TLS)){
+		if (!properties.containsKey(CHANGE_NONE_TO_TLS) && tlsAlwaysCB.isEnabled()){
 				tlsAlwaysCB.setSelected(false);
 		}
 		tlsAlwaysCB.addItemListener(new java.awt.event.ItemListener() {
