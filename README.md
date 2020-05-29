@@ -1,4 +1,4 @@
-This modified tn5250j is Based on version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
+This modified tn5250j is based on version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
 
 There was a need for a slightly changed version to better interact with a calling program.
 
