@@ -1,4 +1,4 @@
-Based on TN5250J of Version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/tree/master/src/org/tn5250j
+Based on TN5250J of Version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
 
 ConnectDialog
  - Resizable dialog & connections scrollpane
