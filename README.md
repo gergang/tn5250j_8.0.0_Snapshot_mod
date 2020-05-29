@@ -1,22 +1,10 @@
-Based on TN5250J of Version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
+This modified tn5250j is Based on version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
 
-ConnectDialog
- - Resizable dialog & connections scrollpane
- - Checkbox added to connections panel to overwrite encryption setting
- - Cancel & Window closing will now properly shut down the JVM if no sessions exist   
- 
-My5250
- - Code cleaned up
- - Shutdown logic changed to avoid buffer overflow error when closing/reopening sessions
- - System.exit(0) put into its own method & made public hence overwritable
- - New Action Event: FIND_AND_OPEN_EXISTING_SESSION
+There was a need for a slightly changed version to better interact with a calling program.
 
-Small changes: 
- Gui5250Frame
- GlobalConfigure
- EmulatorActionEvent
- GUIViewInterface
-to make certain elements accessible from outside.
+ConnectDialog: Resizable dialog & connections scrollpane, checkbox added to connections panel to overwrite encryption setting, cancel & window closing event now properly shut down the JVM if no sessions exist.   
+My5250: Code cleaned up, shutdown logic changed to avoid buffer overflow error when closing/reopening sessions, System.exit(0) put into its own method & made public, hence overwritable.
+Small changes in  Gui5250Frame, GlobalConfigure, EmulatorActionEvent, GUIViewInterface to make certain elements accessible from outside.
 
 Check out my website for a commercial software that can make use of this tn5250j' autosignon feature : https://gergang.net/ibmi/sit/features
 
