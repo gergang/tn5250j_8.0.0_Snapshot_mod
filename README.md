@@ -2,7 +2,7 @@ This modified tn5250j is based on version 8.0.0 Snapshot @ https://github.com/tn
 
 There was a need for a slightly changed version to better interact with a [calling program](https://gergang.net/ibmi/sit):
 
-ConnectDialog: Dialog & connections scrollpane made resizable, checkbox added to connections panel to overwrite encryption setting, cancel & window closing event now properly shut down the JVM if no sessions exist.   
+ConnectDialog: Dialog & connections scrollpane made resizable, checkbox added to connections panel to overwrite encryption setting, cancel & window closing event now properly shut down the JVM when no session exist.   
 My5250: Code cleaned up, shutdown logic changed to avoid buffer overflow error when closing/reopening sessions.
 Small changes in  Gui5250Frame, GlobalConfigure, EmulatorActionEvent, GUIViewInterface to make certain elements accessible from outside.
 
