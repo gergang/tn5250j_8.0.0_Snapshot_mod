@@ -1,5 +1,4 @@
 This modified tn5250j is based on version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
-
 There was a need for a slightly changed version to better interact with a [calling program](https://gergang.net/ibmi/sit):
 
 ConnectDialog: Dialog & connections scrollpane made resizable, checkbox added to connections panel to overwrite encryption setting, cancel & window closing event now properly shut down the JVM when no session exists.   
