@@ -25,6 +25,7 @@ Small changes to
 - GlobalConfigure
 - EmulatorActionEvent
 - GUIViewInterface
+
 to make certain elements accessible from outside.
 
 
