@@ -7,6 +7,27 @@ Small changes in  Gui5250Frame, GlobalConfigure, EmulatorActionEvent, GUIViewInt
 
 tn5250j08mod.zip contains the runnable jar file.
 
+Changes werde done to the following files:
+
+ConnectDialog
+ - Dialog & connections scrollpane are now resizable
+ - Checkbox added to connections panel to overwrite encryption setting
+ - If no sessions are active Cancel & Window closing will now properly shut down the JVM  
+ 
+My5250
+ - Code cleaned up
+ - Shutdown logic changed to avoid buffer overflow error
+ - Shutdown put into its own method & made public hence overwritable
+ - New Action Event: FIND_AND_OPEN_EXISTING_SESSION
+
+Small changes to  
+ Gui5250Frame
+ GlobalConfigure
+ EmulatorActionEvent
+ GUIViewInterface
+to make certain elements accessible from outside.
+
+
 # TN5250J
 A 5250 terminal emulator for the IBM i (AS/400) written in Java.
 
