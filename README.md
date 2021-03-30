@@ -1,13 +1,8 @@
 This modified tn5250j is based on version 8.0.0 Snapshot @ https://github.com/tn5250j/tn5250j/
-There was a need for a slightly changed version to better interact with a calling program.
-
-ConnectDialog: Dialog & connections scrollpane made resizable, checkbox added to connections panel to overwrite encryption setting, cancel & window closing event now properly shut down the JVM when no session exists.   
-My5250: Code cleaned up, shutdown logic changed to avoid buffer overflow error when closing/reopening sessions.
-Small changes in  Gui5250Frame, GlobalConfigure, EmulatorActionEvent, GUIViewInterface to make certain elements accessible from outside.
-
 tn5250j08mod.zip contains the runnable jar file.
 
-Changes werde done to the following files:
+This modification was done a tn5250j version was needed to better interact with a calling program.
+Changes were done to the following files:
 
 ConnectDialog
  - Dialog & connections scrollpane are now resizable
