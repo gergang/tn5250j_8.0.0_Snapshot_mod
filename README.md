@@ -21,10 +21,10 @@ My5250
  - New Action Event: FIND_AND_OPEN_EXISTING_SESSION
 
 Small changes to  
- Gui5250Frame
- GlobalConfigure
- EmulatorActionEvent
- GUIViewInterface
+- Gui5250Frame
+- GlobalConfigure
+- EmulatorActionEvent
+- GUIViewInterface
 to make certain elements accessible from outside.
 
 
